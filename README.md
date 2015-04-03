@@ -2,7 +2,7 @@
 Swift sample code for generating mazes.
 
 ###How to use
-Open ``CircularMaze.playground`` or ``SquareMaze.playground`` in Xcode and run the code through *Editor -> Execute Playground*.
+Open ``SquareMaze.playground`` or ``CircularMaze.playground`` in Xcode and run the code through *Editor -> Execute Playground*.
 
 ###Square mazes 
 <img src="https://cloud.githubusercontent.com/assets/10542894/6987400/002d2fdc-da47-11e4-87cc-4214fe1df009.png" width="200">
