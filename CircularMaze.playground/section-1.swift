@@ -5,10 +5,11 @@ import Foundation
 class Maze {
     // Constants
     let TwoPi = CGFloat(2.0 * Double(M_PI))
-
+    
     // View on which we will draw our maze
     var view:UIView!
     
+    // Enum indicating the target direction when we are going to generate the path
     enum Direction {
         case LEFT
         case UP
@@ -19,7 +20,7 @@ class Maze {
     }
     
     // Sector class represending the sector at a given track and index. A sector consists of
-    // an inner(smaller) arc, an outer(bigger) arc and two lines joining the arc end-points. 
+    // an inner(smaller) arc, an outer(bigger) arc and two lines joining the arc end-points.
     // The upper end-point of the inner arc is joined with the upper end-point of the outer arc with a line.
     // Similarly the lower end-point of the inner arc is joined with the lower end-point of the outer arc with a line.
     class Sector {
@@ -64,7 +65,6 @@ class Maze {
             return
         }
         
-        
         var sectorCount = 4 * innerSpokesPerQuadrant
         var trackCount = Int(roomRadius/trackWidth)
         var newTrackCount = trackCount
@@ -76,7 +76,7 @@ class Maze {
                 sectorCount *= 2
             }
         }
-
+        
         view = generateMazeView(numberOfTracks: numberOfTracks, numberOfSectorsPerTrack: numberOfSectorsPerTrack, screenSize:screenSize, mazeCenter: mazeCenter, roomRadius: roomRadius, trackWidth:trackWidth)
     }
     
@@ -128,34 +128,30 @@ class Maze {
         result.startAngle = CGFloat(CGFloat(sectorIndex) * result.angle)
         result.endAngle = result.startAngle + result.angle
         
+        // Inner Arc
         result.innerRadius = roomRadius + (trackIndex * trackWidth)
         result.innerArcXD = Int(CGFloat(mazeCenter) + CGFloat(roomRadius + trackWidth * trackIndex) * cos(TwoPi * CGFloat(sectorIndex) / CGFloat(numberOfSectorsPerTrack[trackIndex])))
-        
         result.innerArcXU = Int(CGFloat(mazeCenter) + CGFloat(roomRadius + trackWidth * trackIndex) * cos(TwoPi * CGFloat(sectorIndex + 1) / CGFloat(numberOfSectorsPerTrack[trackIndex])))
         result.innerArcYD = Int(CGFloat(mazeCenter) + CGFloat(roomRadius + trackWidth * trackIndex) * sin(TwoPi * CGFloat(sectorIndex) / CGFloat(numberOfSectorsPerTrack[trackIndex])))
         result.innerArcYU = Int(CGFloat(mazeCenter) + CGFloat(roomRadius + trackWidth * trackIndex) * sin(TwoPi * CGFloat(sectorIndex + 1) / CGFloat(numberOfSectorsPerTrack[trackIndex])))
+        result.innerArc = UIBezierPath(arcCenter: CGPoint(x: mazeCenter, y: mazeCenter), radius: CGFloat(result.innerRadius), startAngle: result.startAngle, endAngle: result.endAngle, clockwise: true)
         
-        
+        // Outer Arc
         result.outerRadius = roomRadius + ((trackIndex + 1) * trackWidth)
         result.outerArcXD = Int(CGFloat(mazeCenter) + CGFloat(roomRadius + trackWidth * (trackIndex + 1)) * cos(TwoPi * CGFloat(sectorIndex) / CGFloat(numberOfSectorsPerTrack[trackIndex])))
         result.outerArcXU = Int(CGFloat(mazeCenter) + CGFloat(roomRadius + trackWidth * (trackIndex + 1)) * cos(TwoPi * CGFloat(sectorIndex + 1) / CGFloat(numberOfSectorsPerTrack[trackIndex])))
         result.outerArcYD = Int(CGFloat(mazeCenter) + CGFloat(roomRadius + trackWidth * (trackIndex + 1)) * sin(TwoPi * CGFloat(sectorIndex) / CGFloat(numberOfSectorsPerTrack[trackIndex])))
         result.outerArcYU = Int(CGFloat(mazeCenter) + CGFloat(roomRadius + trackWidth * (trackIndex + 1)) * sin(TwoPi * CGFloat(sectorIndex + 1) / CGFloat(numberOfSectorsPerTrack[trackIndex])))
-        
-        
-        result.innerArc = UIBezierPath(arcCenter: CGPoint(x: mazeCenter, y: mazeCenter), radius: CGFloat(result.innerRadius), startAngle: result.startAngle, endAngle: result.endAngle, clockwise: true)
         result.outerArc = UIBezierPath(arcCenter: CGPoint(x: mazeCenter, y: mazeCenter), radius: CGFloat(result.outerRadius), startAngle: result.startAngle, endAngle: result.endAngle, clockwise: true)
         
         result.downPath = drawLine(from: CGPoint(x: result.innerArcXD, y: result.innerArcYD), to: CGPoint(x: result.outerArcXD, y: result.outerArcYD))
-        
         result.upPath = drawLine(from: CGPoint(x: result.innerArcXU, y: result.innerArcYU), to: CGPoint(x: result.outerArcXU, y: result.outerArcYU))
-        
         
         return result
     }
     
     /**
-    Generates the Sectors for every track and adds them to a separate array for each track. It returns 
+    Generates the Sectors for every track and adds them to a separate array for each track. It returns
     an [[Sector]] (array of arrays), where array[t][s] holds the sth Sector of track t.
     
     
@@ -217,7 +213,6 @@ class Maze {
         // Randomly remove any edges and arcs from the above generated grid
         createPath(&visitedSectors, numberOfSectorsPerTrack:numberOfSectorsPerTrack, sectorsOfTrack:sectorsOfTrack, numberOfTracks:numberOfTracks, trackIndex:0, sectorIndex:0)
         
-        
         // Do the drawing
         let viewSize = CGSize(width: screenSize, height: screenSize)
         result = UIView(frame: CGRect(origin: CGPointZero, size: viewSize))
@@ -230,7 +225,6 @@ class Maze {
         let circlePath = UIBezierPath(arcCenter: CGPoint(x: mazeCenter, y: mazeCenter), radius: CGFloat(4), startAngle: 0.0, endAngle: TwoPi, clockwise: true)
         circlePath.stroke()
         circlePath.fill()
-        
         
         // open up start
         var numberOfSectorsInnerTrack = Int(numberOfSectorsPerTrack[0])
@@ -263,7 +257,7 @@ class Maze {
     
     /**
     Creates a path by visiting all the sectors in the maze grid.
-
+    
     :param: visitedSectors [[Bool]] with [t][s] == true if sector s of track t has already been visited. false otherwise.
     
     :param: numberOfSectorsPerTrack [Int] Array holding the number of arrays in each track
@@ -271,7 +265,7 @@ class Maze {
     :param: sectorsOfTrack [[Sector]] (array of arrays), where array[t][s] holds the sth Sector of track t.
     
     :param: numberOfTracks Int indicating the total number of tracks
-
+    
     :param: trackIndex Int current track index
     
     :param: sectorIndex Int current sector index
@@ -436,8 +430,8 @@ class Maze {
                     break OUTERWHILE
                 }
                 
-            } // end of while(true)
-        } // end of while(exist)
+            } // end of INNERWHILE
+        } // end of OUTERWHILE
     }
     
     
@@ -445,7 +439,6 @@ class Maze {
 
 
 var maze = Maze(trackWidth: 40, innerSpokesPerQuadrant: 6, screenSize: 400)
-
 XCPShowView("preview", maze.view)
 
 

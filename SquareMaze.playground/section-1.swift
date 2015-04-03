@@ -32,10 +32,10 @@ class Maze {
     var size = 0
     
     // is there a wall to north of cell i, j
-    var north   :Grid<Bool>
-    var east    :Grid<Bool>
-    var south   :Grid<Bool>
-    var west    :Grid<Bool>
+    var up      :Grid<Bool>
+    var right   :Grid<Bool>
+    var down    :Grid<Bool>
+    var left    :Grid<Bool>
     var visited :Grid<Bool>
     
     var done = false
@@ -45,10 +45,10 @@ class Maze {
         self.size = size
         
         visited = Grid<Bool>(rows: (size+2), columns: (size+2), defaultValue: false)
-        north = Grid<Bool>(rows: (size+2), columns: (size+2), defaultValue: true)
-        east = Grid<Bool>(rows: (size+2), columns: (size+2), defaultValue: true)
-        south = Grid<Bool>(rows: (size+2), columns: (size+2), defaultValue: true)
-        west = Grid<Bool>(rows: (size+2), columns: (size+2), defaultValue: true)
+        up = Grid<Bool>(rows: (size+2), columns: (size+2), defaultValue: true)
+        right = Grid<Bool>(rows: (size+2), columns: (size+2), defaultValue: true)
+        down = Grid<Bool>(rows: (size+2), columns: (size+2), defaultValue: true)
+        left = Grid<Bool>(rows: (size+2), columns: (size+2), defaultValue: true)
         
         // Initialize border cells as already visited
         for x in 0..<size+2 {
@@ -75,33 +75,33 @@ class Maze {
             while (true) {
                 var r =  UInt32(rand()) % 4
                 if (r == 0 && !visited[x,y + 1]) {
-                    north[x,y] = false
-                    south[x,y + 1] = false
+                    up[x,y] = false
+                    down[x,y + 1] = false
                     generate(x, y: y + 1)
                     break
                 } else if (r == 1 && !visited[x + 1,y]) {
-                    east[x,y] = false
-                    west[x + 1, y] = false
+                    right[x,y] = false
+                    left[x + 1, y] = false
                     generate(x + 1, y: y)
                     break
                 } else if (r == 2 && !visited[x,y - 1]) {
-                    south[x,y] = false
-                    north[x,y - 1] = false
+                    down[x,y] = false
+                    up[x,y - 1] = false
                     generate(x, y: y - 1)
                     break
                 } else if (r == 3 && !visited[x - 1,y]) {
-                    west[x,y] = false
-                    east[x - 1,y] = false
+                    left[x,y] = false
+                    right[x - 1,y] = false
                     generate(x - 1, y: y)
                     break
                 }
             }
         }
         
-        north[1,1] = false
-        south[1,1] = false
-        north[size,size] = false
-        south[size,size] = false
+        up[1,1] = false
+        down[1,1] = false
+        up[size,size] = false
+        down[size,size] = false
     }
 
     
@@ -124,18 +124,18 @@ class Maze {
         for x in 1..<size+1 {
             for y in 1..<size+1 {
                 
-                if (south[x,y]) {
+                if (down[x,y]) {
                     drawLine(from: CGPoint(x:x,y:y), to: CGPoint(x:x+1,y:y), resizeFactor:resizeFactor)
                 }
                 
-                if (north[x,y]) {
+                if (up[x,y]) {
                     drawLine(from: CGPoint(x:x,y:y+1), to: CGPoint(x:x+1,y:y+1), resizeFactor:resizeFactor)
                 }
                 
-                if (west[x,y]) {
+                if (left[x,y]) {
                     drawLine(from: CGPoint(x:x,y:y), to: CGPoint(x:x,y:y+1), resizeFactor:resizeFactor)
                 }
-                if (east[x,y]) {
+                if (right[x,y]) {
                     drawLine(from: CGPoint(x:x+1,y:y), to: CGPoint(x:x+1,y:y+1), resizeFactor:resizeFactor)
                 }
 
@@ -149,7 +149,7 @@ class Maze {
 }
 
 
-var maze = Maze(size: 20)
+var maze = Maze(size: 30)
 
 XCPShowView("preview", maze.draw())
 
