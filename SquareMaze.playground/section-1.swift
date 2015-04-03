@@ -149,9 +149,9 @@ class Maze {
 }
 
 
-//var maze = Maze(size: 20)
+var maze = Maze(size: 20)
 
-//XCPShowView("preview", maze.draw())
+XCPShowView("preview", maze.draw())
 
 
 
