@@ -1,3 +1,11 @@
+//
+//  CircularMaze.playground
+//
+//
+//  Created by Lucas Louca on 04/04/15 - www.lucaslouca.com
+//
+//  Copyright (c) 2015 Lucas Louca. All rights reserved.
+
 import XCPlayground
 import SpriteKit
 import Foundation
@@ -438,7 +446,7 @@ class Maze {
 }
 
 
-var maze = Maze(trackWidth: 40, innerSpokesPerQuadrant: 6, screenSize: 400)
+var maze = Maze(trackWidth: 20, innerSpokesPerQuadrant: 6, screenSize: 400)
 XCPShowView("preview", maze.view)
 
 

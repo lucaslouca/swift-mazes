@@ -1,6 +1,15 @@
+//
+//  SquareMaze.playground
+//
+//
+//  Created by Lucas Louca on 04/04/15 - www.lucaslouca.com
+//
+//  Copyright (c) 2015 Lucas Louca. All rights reserved.
+
 import XCPlayground
 import SpriteKit
 
+// Class representing a grid, where elements can be accessed using [x,y] subscript syntax
 class Grid<T> {
     var matrix:[T]
     var rows:Int;
@@ -28,83 +37,106 @@ class Grid<T> {
     }
 }
 
+// Class representing a Maze
 class Maze {
-    var size = 0
-    
-    // is there a wall to north of cell i, j
+    // Walls. [x,y] is true if there is a wall up/right/down/left of [x,y]
     var up      :Grid<Bool>
     var right   :Grid<Bool>
     var down    :Grid<Bool>
     var left    :Grid<Bool>
-    var visited :Grid<Bool>
     
-    var done = false
+    // Visited cells
+    var visitedCells :Grid<Bool>
     
+    // View on which we will draw our maze
+    var view:UIView!
     
-    init(size: Int) {
-        self.size = size
+    /**
+    Init method.
+    
+    :param: gridSize Int indicating the width and hight of the maze in number of cells, with width = height = gridSize
+    :param: screenSize Int indicating the width and hight of the view, with width = height = screenSize
+    */
+    init(gridSize: Int, screenSize: Int) {
         
-        visited = Grid<Bool>(rows: (size+2), columns: (size+2), defaultValue: false)
-        up = Grid<Bool>(rows: (size+2), columns: (size+2), defaultValue: true)
-        right = Grid<Bool>(rows: (size+2), columns: (size+2), defaultValue: true)
-        down = Grid<Bool>(rows: (size+2), columns: (size+2), defaultValue: true)
-        left = Grid<Bool>(rows: (size+2), columns: (size+2), defaultValue: true)
+        visitedCells = Grid<Bool>(rows: (gridSize+2), columns: (gridSize+2), defaultValue: false)
+        up = Grid<Bool>(rows: (gridSize+2), columns: (gridSize+2), defaultValue: true)
+        right = Grid<Bool>(rows: (gridSize+2), columns: (gridSize+2), defaultValue: true)
+        down = Grid<Bool>(rows: (gridSize+2), columns: (gridSize+2), defaultValue: true)
+        left = Grid<Bool>(rows: (gridSize+2), columns: (gridSize+2), defaultValue: true)
         
-        // Initialize border cells as already visited
-        for x in 0..<size+2 {
-            visited[x,0] = true
-            visited[x,size+1] = true
+        // Initialize perimeter as already visited
+        for x in 0..<gridSize+2 {
+            visitedCells[x,0] = true
+            visitedCells[x,gridSize+1] = true
         }
         
-        for y in 0..<size+2 {
-            visited[0,y] = true
-            visited[size+1,y] = true
+        for y in 0..<gridSize+2 {
+            visitedCells[0,y] = true
+            visitedCells[gridSize+1,y] = true
         }
         
-       generate(1, y:1);
+        dropWalls(1, y:1, gridSize:gridSize);
+        
+        view = drawView(gridSize:gridSize, screenSize:screenSize)
     }
     
+    /**
+    Visit every cell in the maze grid by picking a random unvisited cell each time. "Drop" the
+    wall between the source and the destination node by marking the appropriate position in the
+    corresponding wall grids as false.
     
-    func generate(x:Int, y:Int) {
-        visited[x,y] = true;
+    :param: x Int x position in the grid of the destination node
+    :param: y Int y position in the grid of the destination node
+    :param: gridSize Int indicating the width and hight of the maze in number of cells, with width = height = gridSize
+    */
+    func dropWalls(x:Int, y:Int, gridSize: Int) {
+        visitedCells[x,y] = true;
         
-        // while there is an unvisited neighbor
-        while (!visited[x,y + 1] || !visited[x + 1,y] || !visited[x,y - 1] || !visited[x - 1,y]) {
+        // Loop while we have unvisited cells
+        while (!visitedCells[x,y + 1] || !visitedCells[x + 1,y] || !visitedCells[x,y - 1] || !visitedCells[x - 1,y]) {
             
-            // pick random neighbor
+            // Choose a random destination cell
             while (true) {
                 var r =  UInt32(rand()) % 4
-                if (r == 0 && !visited[x,y + 1]) {
+                if (r == 0 && !visitedCells[x,y + 1]) {
                     up[x,y] = false
                     down[x,y + 1] = false
-                    generate(x, y: y + 1)
+                    dropWalls(x, y: y + 1, gridSize:gridSize)
                     break
-                } else if (r == 1 && !visited[x + 1,y]) {
+                } else if (r == 1 && !visitedCells[x + 1,y]) {
                     right[x,y] = false
                     left[x + 1, y] = false
-                    generate(x + 1, y: y)
+                    dropWalls(x + 1, y: y, gridSize:gridSize)
                     break
-                } else if (r == 2 && !visited[x,y - 1]) {
+                } else if (r == 2 && !visitedCells[x,y - 1]) {
                     down[x,y] = false
                     up[x,y - 1] = false
-                    generate(x, y: y - 1)
+                    dropWalls(x, y: y - 1, gridSize:gridSize)
                     break
-                } else if (r == 3 && !visited[x - 1,y]) {
+                } else if (r == 3 && !visitedCells[x - 1,y]) {
                     left[x,y] = false
                     right[x - 1,y] = false
-                    generate(x - 1, y: y)
+                    dropWalls(x - 1, y: y, gridSize:gridSize)
                     break
                 }
             }
         }
         
+        // Open up the start and end
         up[1,1] = false
         down[1,1] = false
-        up[size,size] = false
-        down[size,size] = false
+        up[gridSize,gridSize] = false
+        down[gridSize,gridSize] = false
     }
-
     
+    /**
+    Draws a line that connects the two end-points from and to.
+    
+    :param: from CGPoint first end-point of the line
+    :param: to CGPoint y second end-point of the line
+    :param: resizeFactor CGFloat scalar with which from and to should be multiplied with
+    */
     func drawLine(#from:CGPoint, to:CGPoint, resizeFactor:CGFloat) {
         let path = UIBezierPath()
         path.moveToPoint(CGPointMake(from.x*resizeFactor, from.y*resizeFactor))
@@ -113,16 +145,24 @@ class Maze {
         path.stroke()
     }
     
-    func draw() -> UIView {
-        let viewSize = CGSize(width: 300, height: 300)
+    /**
+    Draws the maze on a UIView and returns the view
+    
+    :param: gridSize Int indicating the width and hight of the maze in number of cells, with width = height = gridSize
+    :param: screenSize Int indicating the width and hight of the view, with width = height = screenSize
+    
+    :return: UIView containing the drawn maze
+    */
+    func drawView(#gridSize:Int, screenSize:Int) -> UIView {
+        let viewSize = CGSize(width: screenSize, height: screenSize)
         let result:UIView = UIView(frame: CGRect(origin: CGPointZero, size: viewSize))
         result.backgroundColor = UIColor(white: 1.0, alpha: 1.0)
         UIGraphicsBeginImageContextWithOptions(viewSize, false, 0)
         
-        var resizeFactor = viewSize.width/CGFloat(size + 2)
+        var resizeFactor = viewSize.width/CGFloat(gridSize + 2)
         
-        for x in 1..<size+1 {
-            for y in 1..<size+1 {
+        for x in 1..<gridSize+1 {
+            for y in 1..<gridSize+1 {
                 
                 if (down[x,y]) {
                     drawLine(from: CGPoint(x:x,y:y), to: CGPoint(x:x+1,y:y), resizeFactor:resizeFactor)
@@ -138,10 +178,10 @@ class Maze {
                 if (right[x,y]) {
                     drawLine(from: CGPoint(x:x+1,y:y), to: CGPoint(x:x+1,y:y+1), resizeFactor:resizeFactor)
                 }
-
+                
             }
         }
-    
+        
         result.layer.contents = UIGraphicsGetImageFromCurrentImageContext().CGImage
         UIGraphicsEndImageContext()
         return result
@@ -149,9 +189,8 @@ class Maze {
 }
 
 
-var maze = Maze(size: 30)
-
-XCPShowView("preview", maze.draw())
+var maze = Maze(gridSize: 30, screenSize: 300)
+XCPShowView("preview", maze.view)
 
 
 
