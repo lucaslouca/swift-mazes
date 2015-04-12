@@ -12,8 +12,8 @@ import SpriteKit
 // Class representing a grid, where elements can be accessed using [x,y] subscript syntax
 class Grid<T> {
     var matrix:[T]
-    var rows:Int;
-    var columns:Int;
+    var rows:Int
+    var columns:Int
     
     init(rows:Int, columns:Int, defaultValue:T) {
         self.rows = rows
