@@ -12,8 +12,8 @@ import SpriteKit
 // Class representing a grid, where elements can be accessed using [x,y] subscript syntax
 class Grid<T> {
     var matrix:[T]
-    var rows:Int;
-    var columns:Int;
+    var rows:Int
+    var columns:Int
     
     init(rows:Int, columns:Int, defaultValue:T) {
         self.rows = rows
@@ -98,7 +98,7 @@ class Maze {
             
             // Choose a random destination cell
             while (true) {
-                var r =  UInt32(rand()) % 4
+                let r =  UInt32(rand()) % 4
                 if (r == 0 && !visitedCells[x,y + 1]) {
                     up[x,y] = false
                     down[x,y + 1] = false
@@ -137,7 +137,7 @@ class Maze {
     :param: to CGPoint y second end-point of the line
     :param: resizeFactor CGFloat scalar with which from and to should be multiplied with
     */
-    func drawLine(#from:CGPoint, to:CGPoint, resizeFactor:CGFloat) {
+    func drawLine(from from:CGPoint, to:CGPoint, resizeFactor:CGFloat) {
         let path = UIBezierPath()
         path.moveToPoint(CGPointMake(from.x*resizeFactor, from.y*resizeFactor))
         path.addLineToPoint(CGPointMake(to.x*resizeFactor, to.y*resizeFactor))
@@ -153,13 +153,13 @@ class Maze {
     
     :return: UIView containing the drawn maze
     */
-    func drawView(#gridSize:Int, screenSize:Int) -> UIView {
+    func drawView(gridSize gridSize:Int, screenSize:Int) -> UIView {
         let viewSize = CGSize(width: screenSize, height: screenSize)
         let result:UIView = UIView(frame: CGRect(origin: CGPointZero, size: viewSize))
         result.backgroundColor = UIColor(white: 1.0, alpha: 1.0)
         UIGraphicsBeginImageContextWithOptions(viewSize, false, 0)
         
-        var resizeFactor = viewSize.width/CGFloat(gridSize + 2)
+    let resizeFactor = viewSize.width/CGFloat(gridSize + 2)
         
         for x in 1..<gridSize+1 {
             for y in 1..<gridSize+1 {
@@ -190,7 +190,7 @@ class Maze {
 
 
 var maze = Maze(gridSize: 30, screenSize: 300)
-XCPShowView("preview", maze.view)
+XCPShowView("preview", view: maze.view)
 
 
 

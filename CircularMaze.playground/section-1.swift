@@ -64,10 +64,10 @@ class Maze {
     :param: screenSize Int indicating the width and hight of the maze, with width = height = screenSize
     */
     init(trackWidth:Int, innerSpokesPerQuadrant:Int, screenSize:Int) {
-        var roomRadius:Int = 2 * trackWidth
+        let roomRadius:Int = 2 * trackWidth
         var numberOfSectorsPerTrack:[Int] = []
-        var numberOfTracks:Int = Int(Int((screenSize - 10 - 2 * roomRadius) / trackWidth) / 2)
-        var mazeCenter:Int = Int(screenSize/2)
+        let numberOfTracks:Int = Int(Int((screenSize - 10 - 2 * roomRadius) / trackWidth) / 2)
+        let mazeCenter:Int = Int(screenSize/2)
         
         if (numberOfTracks < 1) {
             return
@@ -98,7 +98,7 @@ class Maze {
     
     :return: UIBezierPath representing a line joining the two points
     */
-    func drawLine(#from:CGPoint, to:CGPoint) -> UIBezierPath {
+    func drawLine(from from:CGPoint, to:CGPoint) -> UIBezierPath {
         let path = UIBezierPath()
         path.moveToPoint(CGPointMake(from.x, from.y))
         path.addLineToPoint(CGPointMake(to.x, to.y))
@@ -129,8 +129,8 @@ class Maze {
     
     :return: Sector representing sector in the circle grid.
     */
-    func createSector(#trackIndex:Int, sectorIndex:Int, numberOfSectorsPerTrack:[Int], mazeCenter:Int, roomRadius:Int, trackWidth:Int) -> Sector {
-        var result = Sector()
+    func createSector(trackIndex trackIndex:Int, sectorIndex:Int, numberOfSectorsPerTrack:[Int], mazeCenter:Int, roomRadius:Int, trackWidth:Int) -> Sector {
+        let result = Sector()
         
         result.angle = CGFloat(Double(TwoPi) / Double(numberOfSectorsPerTrack[trackIndex]))
         result.startAngle = CGFloat(CGFloat(sectorIndex) * result.angle)
@@ -175,12 +175,12 @@ class Maze {
     
     :return: [[Sector]] array holding every Sector for each track ([track][sector])
     */
-    func generateGrid(#numberOfTracks:Int, numberOfSectorsPerTrack:[Int], mazeCenter:Int, roomRadius:Int, trackWidth:Int) -> [[Sector]]  {
+    func generateGrid(numberOfTracks numberOfTracks:Int, numberOfSectorsPerTrack:[Int], mazeCenter:Int, roomRadius:Int, trackWidth:Int) -> [[Sector]]  {
         var result:[[Sector]] = []
         for t in 1...numberOfTracks {
             result.append([])
             for s in 0..<numberOfSectorsPerTrack[t - 1] {
-                var sector = createSector(trackIndex:(t - 1), sectorIndex:s, numberOfSectorsPerTrack:numberOfSectorsPerTrack, mazeCenter:mazeCenter, roomRadius:roomRadius, trackWidth:trackWidth)
+                let sector = createSector(trackIndex:(t - 1), sectorIndex:s, numberOfSectorsPerTrack:numberOfSectorsPerTrack, mazeCenter:mazeCenter, roomRadius:roomRadius, trackWidth:trackWidth)
                 result[t - 1].append(sector)
             }
         }
@@ -206,7 +206,7 @@ class Maze {
     
     :return: UIView view with the painted maze on it
     */
-    func generateMazeView(#numberOfTracks:Int, numberOfSectorsPerTrack:[Int], screenSize:Int, mazeCenter:Int, roomRadius:Int, trackWidth:Int) -> UIView {
+    func generateMazeView(numberOfTracks numberOfTracks:Int, numberOfSectorsPerTrack:[Int], screenSize:Int, mazeCenter:Int, roomRadius:Int, trackWidth:Int) -> UIView {
         var result:UIView!
         
         // Generate circular grid
@@ -214,7 +214,7 @@ class Maze {
         
         // Init array of visited sectors
         var visitedSectors:[[Bool]] = []
-        for i in 0...numberOfTracks {
+        for _ in 0...numberOfTracks {
             visitedSectors.append(Array(count: numberOfSectorsPerTrack[numberOfTracks - 1], repeatedValue:false))
         }
         
@@ -235,21 +235,21 @@ class Maze {
         circlePath.fill()
         
         // open up start
-        var numberOfSectorsInnerTrack = Int(numberOfSectorsPerTrack[0])
-        var randomInnerSectorIndex =  Int(UInt32(rand()) % UInt32(numberOfSectorsInnerTrack))
-        var randomInnerSector = sectorsOfTrack[0][randomInnerSectorIndex]
+        let numberOfSectorsInnerTrack = Int(numberOfSectorsPerTrack[0])
+        let randomInnerSectorIndex =  Int(UInt32(rand()) % UInt32(numberOfSectorsInnerTrack))
+        let randomInnerSector = sectorsOfTrack[0][randomInnerSectorIndex]
         randomInnerSector.innerArc!.removeAllPoints()
         
         // open up end
-        var numberOfSectorsOuterTrack = Int(numberOfSectorsPerTrack[numberOfTracks - 1])
-        var randomOuterSectorIndex =  Int(UInt32(rand()) % UInt32(numberOfSectorsOuterTrack))
-        var randomOuterSector = sectorsOfTrack[numberOfTracks - 1][randomOuterSectorIndex]
+        let numberOfSectorsOuterTrack = Int(numberOfSectorsPerTrack[numberOfTracks - 1])
+        let randomOuterSectorIndex =  Int(UInt32(rand()) % UInt32(numberOfSectorsOuterTrack))
+        let randomOuterSector = sectorsOfTrack[numberOfTracks - 1][randomOuterSectorIndex]
         randomOuterSector.outerArc!.removeAllPoints()
         
         // Draw arcs and lines
         for t in 1...numberOfTracks {
             for s in 0..<numberOfSectorsPerTrack[t - 1] {
-                var sector = sectorsOfTrack[t - 1][s]
+                let sector = sectorsOfTrack[t - 1][s]
                 sector.innerArc!.stroke()
                 sector.outerArc!.stroke()
                 sector.upPath!.stroke()
@@ -347,8 +347,8 @@ class Maze {
                 // Now that we have got our possible directions for a sector in a track we can
                 // randomly pick one and drop the wall
                 if (numberOfPossibleDirections > 0) {
-                    var random =  Int(UInt32(rand()) % 5)
-                    var dir:Direction = direction[Int(random)]
+                    let random =  Int(UInt32(rand()) % 5)
+                    let dir:Direction = direction[Int(random)]
                     var newSectorIndex = sectorIndex
                     var newTrackIndex = trackIndex
                     var fromSectorObj:Sector!
@@ -447,7 +447,7 @@ class Maze {
 
 
 var maze = Maze(trackWidth: 20, innerSpokesPerQuadrant: 6, screenSize: 400)
-XCPShowView("preview", maze.view)
+XCPShowView("preview", view: maze.view)
 
 
 
