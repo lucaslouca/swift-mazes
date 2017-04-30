@@ -18,7 +18,7 @@ class Grid<T> {
     init(rows:Int, columns:Int, defaultValue:T) {
         self.rows = rows
         self.columns = columns
-        matrix = Array(count:(rows*columns),repeatedValue:defaultValue)
+        matrix = Array(repeating:defaultValue,count:(rows*columns))
     }
     
     func indexIsValidForRow(row: Int, column: Int) -> Bool {
@@ -27,11 +27,11 @@ class Grid<T> {
     
     subscript(col:Int, row:Int) -> T {
         get{
-            assert(indexIsValidForRow(row, column: col), "Index out of range")
+            assert(indexIsValidForRow(row: row, column: col), "Index out of range")
             return matrix[Int(columns * row + col)]
         }
         set{
-            assert(indexIsValidForRow(row, column: col), "Index out of range")
+            assert(indexIsValidForRow(row: row, column: col), "Index out of range")
             matrix[(columns * row) + col] = newValue
         }
     }
@@ -76,7 +76,7 @@ class Maze {
             visitedCells[gridSize+1,y] = true
         }
         
-        dropWalls(1, y:1, gridSize:gridSize);
+        dropWalls(x: 1, y:1, gridSize:gridSize);
         
         view = drawView(gridSize:gridSize, screenSize:screenSize)
     }
@@ -98,26 +98,26 @@ class Maze {
             
             // Choose a random destination cell
             while (true) {
-                let r =  UInt32(rand()) % 4
+                let r =  UInt32(arc4random()) % 4
                 if (r == 0 && !visitedCells[x,y + 1]) {
                     up[x,y] = false
                     down[x,y + 1] = false
-                    dropWalls(x, y: y + 1, gridSize:gridSize)
+                    dropWalls(x: x, y: y + 1, gridSize:gridSize)
                     break
                 } else if (r == 1 && !visitedCells[x + 1,y]) {
                     right[x,y] = false
                     left[x + 1, y] = false
-                    dropWalls(x + 1, y: y, gridSize:gridSize)
+                    dropWalls(x: x + 1, y: y, gridSize:gridSize)
                     break
                 } else if (r == 2 && !visitedCells[x,y - 1]) {
                     down[x,y] = false
                     up[x,y - 1] = false
-                    dropWalls(x, y: y - 1, gridSize:gridSize)
+                    dropWalls(x: x, y: y - 1, gridSize:gridSize)
                     break
                 } else if (r == 3 && !visitedCells[x - 1,y]) {
                     left[x,y] = false
                     right[x - 1,y] = false
-                    dropWalls(x - 1, y: y, gridSize:gridSize)
+                    dropWalls(x: x - 1, y: y, gridSize:gridSize)
                     break
                 }
             }
@@ -137,11 +137,11 @@ class Maze {
     :param: to CGPoint y second end-point of the line
     :param: resizeFactor CGFloat scalar with which from and to should be multiplied with
     */
-    func drawLine(from from:CGPoint, to:CGPoint, resizeFactor:CGFloat) {
+    func drawLine(from:CGPoint, to:CGPoint, resizeFactor:CGFloat) {
         let path = UIBezierPath()
-        path.moveToPoint(CGPointMake(from.x*resizeFactor, from.y*resizeFactor))
-        path.addLineToPoint(CGPointMake(to.x*resizeFactor, to.y*resizeFactor))
-        UIColor.blackColor().setStroke()
+		path.move(to: CGPoint(x:from.x*resizeFactor, y:from.y*resizeFactor))
+		path.addLine(to: CGPoint(x:to.x*resizeFactor, y:to.y*resizeFactor))
+        UIColor.black.setStroke()
         path.stroke()
     }
     
@@ -153,9 +153,9 @@ class Maze {
     
     :return: UIView containing the drawn maze
     */
-    func drawView(gridSize gridSize:Int, screenSize:Int) -> UIView {
+    func drawView(gridSize:Int, screenSize:Int) -> UIView {
         let viewSize = CGSize(width: screenSize, height: screenSize)
-        let result:UIView = UIView(frame: CGRect(origin: CGPointZero, size: viewSize))
+        let result:UIView = UIView(frame: CGRect(origin: CGPoint.zero, size: viewSize))
         result.backgroundColor = UIColor(white: 1.0, alpha: 1.0)
         UIGraphicsBeginImageContextWithOptions(viewSize, false, 0)
         
@@ -182,7 +182,7 @@ class Maze {
             }
         }
         
-        result.layer.contents = UIGraphicsGetImageFromCurrentImageContext().CGImage
+        result.layer.contents = UIGraphicsGetImageFromCurrentImageContext()?.cgImage
         UIGraphicsEndImageContext()
         return result
     }
@@ -190,7 +190,8 @@ class Maze {
 
 
 var maze = Maze(gridSize: 30, screenSize: 300)
-XCPShowView("preview", view: maze.view)
+XCPlaygroundPage.currentPage.liveView = maze.view
+
 
 
 

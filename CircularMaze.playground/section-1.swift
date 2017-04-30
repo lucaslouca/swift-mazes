@@ -12,7 +12,7 @@ import Foundation
 
 class Maze {
     // Constants
-    let TwoPi = CGFloat(2.0 * Double(M_PI))
+    let TwoPi = CGFloat(2.0 * Double.pi)
     
     // View on which we will draw our maze
     var view:UIView!
@@ -78,7 +78,7 @@ class Maze {
         var newTrackCount = trackCount
         for _ in 0..<numberOfTracks {
             numberOfSectorsPerTrack.append(sectorCount)
-            newTrackCount++
+            newTrackCount += 1
             if (newTrackCount >= trackCount * 2) {
                 trackCount = newTrackCount
                 sectorCount *= 2
@@ -98,10 +98,10 @@ class Maze {
     
     :return: UIBezierPath representing a line joining the two points
     */
-    func drawLine(from from:CGPoint, to:CGPoint) -> UIBezierPath {
+    func drawLine(from:CGPoint, to:CGPoint) -> UIBezierPath {
         let path = UIBezierPath()
-        path.moveToPoint(CGPointMake(from.x, from.y))
-        path.addLineToPoint(CGPointMake(to.x, to.y))
+        path.move(to: CGPoint(x: from.x, y: from.y))
+        path.addLine(to: CGPoint(x: to.x, y: to.y))
         return path
     }
     
@@ -129,7 +129,7 @@ class Maze {
     
     :return: Sector representing sector in the circle grid.
     */
-    func createSector(trackIndex trackIndex:Int, sectorIndex:Int, numberOfSectorsPerTrack:[Int], mazeCenter:Int, roomRadius:Int, trackWidth:Int) -> Sector {
+    func createSector(trackIndex:Int, sectorIndex:Int, numberOfSectorsPerTrack:[Int], mazeCenter:Int, roomRadius:Int, trackWidth:Int) -> Sector {
         let result = Sector()
         
         result.angle = CGFloat(Double(TwoPi) / Double(numberOfSectorsPerTrack[trackIndex]))
@@ -175,7 +175,7 @@ class Maze {
     
     :return: [[Sector]] array holding every Sector for each track ([track][sector])
     */
-    func generateGrid(numberOfTracks numberOfTracks:Int, numberOfSectorsPerTrack:[Int], mazeCenter:Int, roomRadius:Int, trackWidth:Int) -> [[Sector]]  {
+    func generateGrid(numberOfTracks:Int, numberOfSectorsPerTrack:[Int], mazeCenter:Int, roomRadius:Int, trackWidth:Int) -> [[Sector]]  {
         var result:[[Sector]] = []
         for t in 1...numberOfTracks {
             result.append([])
@@ -206,7 +206,7 @@ class Maze {
     
     :return: UIView view with the painted maze on it
     */
-    func generateMazeView(numberOfTracks numberOfTracks:Int, numberOfSectorsPerTrack:[Int], screenSize:Int, mazeCenter:Int, roomRadius:Int, trackWidth:Int) -> UIView {
+    func generateMazeView(numberOfTracks:Int, numberOfSectorsPerTrack:[Int], screenSize:Int, mazeCenter:Int, roomRadius:Int, trackWidth:Int) -> UIView {
         var result:UIView!
         
         // Generate circular grid
@@ -215,34 +215,34 @@ class Maze {
         // Init array of visited sectors
         var visitedSectors:[[Bool]] = []
         for _ in 0...numberOfTracks {
-            visitedSectors.append(Array(count: numberOfSectorsPerTrack[numberOfTracks - 1], repeatedValue:false))
+            visitedSectors.append(Array(repeating:false, count: numberOfSectorsPerTrack[numberOfTracks - 1]))
         }
         
         // Randomly remove any edges and arcs from the above generated grid
-        createPath(&visitedSectors, numberOfSectorsPerTrack:numberOfSectorsPerTrack, sectorsOfTrack:sectorsOfTrack, numberOfTracks:numberOfTracks, trackIndex:0, sectorIndex:0)
+        createPath(visitedSectors: &visitedSectors, numberOfSectorsPerTrack:numberOfSectorsPerTrack, sectorsOfTrack:sectorsOfTrack, numberOfTracks:numberOfTracks, trackIndex:0, sectorIndex:0)
         
         // Do the drawing
         let viewSize = CGSize(width: screenSize, height: screenSize)
-        result = UIView(frame: CGRect(origin: CGPointZero, size: viewSize))
-        result.backgroundColor = UIColor.whiteColor()
+        result = UIView(frame: CGRect(origin: CGPoint.zero, size: viewSize))
+        result.backgroundColor = UIColor.white
         UIGraphicsBeginImageContextWithOptions(viewSize, false, 0)
-        UIColor.blackColor().setStroke()
+        UIColor.black.setStroke()
         
         // Draw center
-        UIColor.blackColor().setFill()
+        UIColor.black.setFill()
         let circlePath = UIBezierPath(arcCenter: CGPoint(x: mazeCenter, y: mazeCenter), radius: CGFloat(4), startAngle: 0.0, endAngle: TwoPi, clockwise: true)
         circlePath.stroke()
         circlePath.fill()
         
         // open up start
         let numberOfSectorsInnerTrack = Int(numberOfSectorsPerTrack[0])
-        let randomInnerSectorIndex =  Int(UInt32(rand()) % UInt32(numberOfSectorsInnerTrack))
+        let randomInnerSectorIndex =  Int(UInt32(arc4random()) % UInt32(numberOfSectorsInnerTrack))
         let randomInnerSector = sectorsOfTrack[0][randomInnerSectorIndex]
         randomInnerSector.innerArc!.removeAllPoints()
         
         // open up end
         let numberOfSectorsOuterTrack = Int(numberOfSectorsPerTrack[numberOfTracks - 1])
-        let randomOuterSectorIndex =  Int(UInt32(rand()) % UInt32(numberOfSectorsOuterTrack))
+        let randomOuterSectorIndex =  Int(UInt32(arc4random()) % UInt32(numberOfSectorsOuterTrack))
         let randomOuterSector = sectorsOfTrack[numberOfTracks - 1][randomOuterSectorIndex]
         randomOuterSector.outerArc!.removeAllPoints()
         
@@ -257,7 +257,7 @@ class Maze {
             }
         }
         
-        result.layer.contents = UIGraphicsGetImageFromCurrentImageContext().CGImage
+        result.layer.contents = UIGraphicsGetImageFromCurrentImageContext()?.cgImage
         UIGraphicsEndImageContext()
         
         return result
@@ -278,7 +278,7 @@ class Maze {
     
     :param: sectorIndex Int current sector index
     */
-    func createPath(inout visitedSectors:[[Bool]], numberOfSectorsPerTrack:[Int], sectorsOfTrack:[[Sector]], numberOfTracks:Int, trackIndex:Int, sectorIndex:Int) {
+    func createPath( visitedSectors:inout [[Bool]], numberOfSectorsPerTrack:[Int], sectorsOfTrack:[[Sector]], numberOfTracks:Int, trackIndex:Int, sectorIndex:Int) {
         var unvisitedSectorExists = ((sectorIndex > 0 && !visitedSectors[trackIndex][sectorIndex - 1]) || (sectorIndex == 0 && !visitedSectors[trackIndex][sectorIndex - 1 + numberOfSectorsPerTrack[trackIndex]]))
         unvisitedSectorExists = unvisitedSectorExists || ((trackIndex > 0) && (numberOfSectorsPerTrack[trackIndex] == numberOfSectorsPerTrack[trackIndex - 1]) && (!visitedSectors[trackIndex - 1][sectorIndex]))
         unvisitedSectorExists = unvisitedSectorExists || ((trackIndex > 0) && (numberOfSectorsPerTrack[trackIndex] != numberOfSectorsPerTrack[trackIndex - 1]) && (!visitedSectors[trackIndex - 1][sectorIndex / 2]))
@@ -292,13 +292,13 @@ class Maze {
             // Make a list of up to 5 ways that the trail can be extended.
             INNERWHILE: while (true) {
                 var numberOfPossibleDirections:Int = 0
-                var direction:[Direction] = Array(count: 5, repeatedValue:Direction.NULLNODE)
-                var distance:[Int] = Array(count: 5, repeatedValue:0)
+                var direction:[Direction] = Array(repeating:Direction.NULLNODE, count: 5)
+                var distance:[Int] = Array(repeating:0, count: 5)
                 
                 if ((sectorIndex > 0 && !visitedSectors[trackIndex][sectorIndex - 1]) || (sectorIndex == 0 && !visitedSectors[trackIndex][sectorIndex - 1 + numberOfSectorsPerTrack[trackIndex]])) {
                     direction[numberOfPossibleDirections] = .LEFT
                     distance[numberOfPossibleDirections] = 1
-                    numberOfPossibleDirections++
+                    numberOfPossibleDirections += 1
                 }
                 
                 if (trackIndex > 0) {
@@ -306,13 +306,13 @@ class Maze {
                         if (!visitedSectors[trackIndex - 1][sectorIndex]) {
                             direction[numberOfPossibleDirections] = .DOWN
                             distance[numberOfPossibleDirections] = 1
-                            numberOfPossibleDirections++
+                            numberOfPossibleDirections += 1
                         }
                     } else {
                         if (!visitedSectors[trackIndex - 1][sectorIndex / 2]) {
                             direction[numberOfPossibleDirections] = .DOWN
                             distance[numberOfPossibleDirections] = 1
-                            numberOfPossibleDirections++
+                            numberOfPossibleDirections += 1
                         }
                     }
                 }
@@ -320,7 +320,7 @@ class Maze {
                 if ((sectorIndex < numberOfSectorsPerTrack[trackIndex] - 1 && !visitedSectors[trackIndex][sectorIndex + 1]) || (sectorIndex == numberOfSectorsPerTrack[trackIndex] - 1 && !visitedSectors[trackIndex][sectorIndex + 1 - numberOfSectorsPerTrack[trackIndex]])) {
                     direction[numberOfPossibleDirections] = .RIGHT
                     distance[numberOfPossibleDirections] = 1
-                    numberOfPossibleDirections++
+                    numberOfPossibleDirections += 1
                 }
                 
                 if (trackIndex < numberOfTracks - 1) {
@@ -328,18 +328,18 @@ class Maze {
                         if (!visitedSectors[trackIndex + 1][sectorIndex]) {
                             direction[numberOfPossibleDirections] = .UP
                             distance[numberOfPossibleDirections] = 1
-                            numberOfPossibleDirections++
+                            numberOfPossibleDirections += 1
                         }
                     } else {
                         if (!visitedSectors[trackIndex + 1][sectorIndex * 2]) {
                             direction[numberOfPossibleDirections] = .UP
                             distance[numberOfPossibleDirections] = 1
-                            numberOfPossibleDirections++
+                            numberOfPossibleDirections += 1
                         }
                         if (!visitedSectors[trackIndex + 1][sectorIndex * 2 + 1]) {
                             direction[numberOfPossibleDirections] = .UPDIAGONAL
                             distance[numberOfPossibleDirections] = 1
-                            numberOfPossibleDirections++
+                            numberOfPossibleDirections += 1
                         }
                     }
                 }
@@ -347,7 +347,7 @@ class Maze {
                 // Now that we have got our possible directions for a sector in a track we can
                 // randomly pick one and drop the wall
                 if (numberOfPossibleDirections > 0) {
-                    let random =  Int(UInt32(rand()) % 5)
+                    let random =  Int(UInt32(arc4random()) % 5)
                     let dir:Direction = direction[Int(random)]
                     var newSectorIndex = sectorIndex
                     var newTrackIndex = trackIndex
@@ -367,7 +367,7 @@ class Maze {
                         
                         visitedSectors[newTrackIndex][newSectorIndex] = true
                         
-                        createPath(&visitedSectors, numberOfSectorsPerTrack:numberOfSectorsPerTrack, sectorsOfTrack:sectorsOfTrack, numberOfTracks:numberOfTracks, trackIndex:newTrackIndex, sectorIndex:newSectorIndex)
+                        createPath(visitedSectors: &visitedSectors, numberOfSectorsPerTrack:numberOfSectorsPerTrack, sectorsOfTrack:sectorsOfTrack, numberOfTracks:numberOfTracks, trackIndex:newTrackIndex, sectorIndex:newSectorIndex)
                         break INNERWHILE
                     }
                     
@@ -384,7 +384,7 @@ class Maze {
                         
                         
                         visitedSectors[newTrackIndex][newSectorIndex] = true
-                        createPath(&visitedSectors, numberOfSectorsPerTrack:numberOfSectorsPerTrack, sectorsOfTrack:sectorsOfTrack, numberOfTracks:numberOfTracks, trackIndex:newTrackIndex, sectorIndex:newSectorIndex)
+                        createPath(visitedSectors: &visitedSectors, numberOfSectorsPerTrack:numberOfSectorsPerTrack, sectorsOfTrack:sectorsOfTrack, numberOfTracks:numberOfTracks, trackIndex:newTrackIndex, sectorIndex:newSectorIndex)
                         break INNERWHILE
                     }
                     
@@ -399,7 +399,7 @@ class Maze {
                         fromSectorObj.innerArc!.removeAllPoints()
                         toSectorObj.outerArc!.removeAllPoints()
                         visitedSectors[newTrackIndex][newSectorIndex] = true
-                        createPath(&visitedSectors, numberOfSectorsPerTrack:numberOfSectorsPerTrack, sectorsOfTrack:sectorsOfTrack, numberOfTracks:numberOfTracks, trackIndex:newTrackIndex, sectorIndex:newSectorIndex)
+                        createPath(visitedSectors: &visitedSectors, numberOfSectorsPerTrack:numberOfSectorsPerTrack, sectorsOfTrack:sectorsOfTrack, numberOfTracks:numberOfTracks, trackIndex:newTrackIndex, sectorIndex:newSectorIndex)
                         break INNERWHILE
                     }
                     
@@ -415,7 +415,7 @@ class Maze {
                         toSectorObj.innerArc!.removeAllPoints()
                         
                         visitedSectors[newTrackIndex][newSectorIndex] = true
-                        createPath(&visitedSectors, numberOfSectorsPerTrack:numberOfSectorsPerTrack, sectorsOfTrack:sectorsOfTrack, numberOfTracks:numberOfTracks, trackIndex:newTrackIndex, sectorIndex:newSectorIndex)
+                        createPath(visitedSectors: &visitedSectors, numberOfSectorsPerTrack:numberOfSectorsPerTrack, sectorsOfTrack:sectorsOfTrack, numberOfTracks:numberOfTracks, trackIndex:newTrackIndex, sectorIndex:newSectorIndex)
                         break INNERWHILE
                     }
                     
@@ -431,7 +431,7 @@ class Maze {
                         toSectorObj.innerArc!.removeAllPoints()
                         
                         visitedSectors[newTrackIndex][newSectorIndex] = true
-                        createPath(&visitedSectors, numberOfSectorsPerTrack:numberOfSectorsPerTrack, sectorsOfTrack:sectorsOfTrack, numberOfTracks:numberOfTracks, trackIndex:newTrackIndex, sectorIndex:newSectorIndex)
+                        createPath(visitedSectors: &visitedSectors, numberOfSectorsPerTrack:numberOfSectorsPerTrack, sectorsOfTrack:sectorsOfTrack, numberOfTracks:numberOfTracks, trackIndex:newTrackIndex, sectorIndex:newSectorIndex)
                         break INNERWHILE
                     }
                 } else {
@@ -446,8 +446,8 @@ class Maze {
 }
 
 
-var maze = Maze(trackWidth: 20, innerSpokesPerQuadrant: 6, screenSize: 400)
-XCPShowView("preview", view: maze.view)
+var maze = Maze(trackWidth: 20, innerSpokesPerQuadrant: 6, screenSize: 500)
+XCPlaygroundPage.currentPage.liveView = maze.view
 
 
 
